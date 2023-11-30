@@ -1,0 +1,40 @@
+# * ***************************************************************************
+# *
+# *  Copyright (C) 2017 University of Dundee
+# *  All rights reserved. 
+# *
+# *  This file is part of AJM (Active Junction Model) program.
+# *
+# *  AJM is free software; you can redistribute it and/or modify
+# *  it under the terms of the GNU General Public License as published by
+# *  the Free Software Foundation; either version 2 of the License, or
+# *  (at your option) any later version.
+# *
+# *  AJM is distributed in the hope that it will be useful,
+# *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+# *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# *  GNU General Public License for more details.
+# *
+# *  You should have received a copy of the GNU General Public License
+# *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# *
+# * ****************************************************************************/
+
+#################################
+## Setup default CXXFLAGS
+if(NOT PASSED_FIRST_CONFIGURE)
+	message(STATUS "Overriding CMake's default CFLAGS (this should appear only once)")
+    
+       # special handling to honor gentoo flags
+
+       execute_process(COMMAND git rev-parse HEAD OUTPUT_VARIABLE GIT_REV ERROR_QUIET)
+       string(STRIP ${GIT_REV} GIT_REV)
+	 
+       set (CMAKE_CXX_STANDARD 14)
+       set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall" CACHE STRING "Flags used by the compiler during debug builds." FORCE)
+       set(CMAKE_CXX_FLAGS_MINSIZEREL "-Os -Wall -DNDEBUG" CACHE STRING "Flags used by the compiler during minimum size release builds." FORCE)
+       set(CMAKE_CXX_FLAGS_RELEASE "-O3 -funroll-loops -ffast-math -DNDEBUG -DVERSION=\"${GIT_REV}\" " CACHE STRING "Flags used by the compiler during release builds." FORCE)
+       set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -O -funroll-loops -ffast-math -DNDEBUG -Wall" CACHE STRING "Flags used by the compiler during release builds with debug info." FORCE)
+
+SET(PASSED_FIRST_CONFIGURE ON CACHE INTERNAL "First configure has run: CXX_FLAGS have had their defaults changed" FORCE)
+endif(NOT PASSED_FIRST_CONFIGURE)
