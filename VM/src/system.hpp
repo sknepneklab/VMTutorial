@@ -101,10 +101,8 @@ namespace VMTutorial
 
       type_data& cell_types() { return _cell_types; }
       type_data& vert_types() { return _vert_types; }
-      type_data& junction_types() { return _junction_types; }
       const string get_cell_type_name(const int type_id) const { return _cell_types_map.at(type_id); }
       const string get_vert_type_name(const int type_id) const { return _vert_types_map.at(type_id); }
-      const string get_junction_type_name(const int type_id) const { return _junction_types_map.at(type_id); }
       int get_num_cell_types() const { return _num_cell_types; }
       int get_num_vert_types() const { return _num_vert_types; }
       int get_max_unique_id() const { return _max_unique_id; }
@@ -131,19 +129,7 @@ namespace VMTutorial
           _vert_types[vert_type] = _num_vert_types++;
         }
       }
-      void add_junction_type(const string& junction_type)
-      {
-        if (_junction_types.find(junction_type) == _junction_types.end())
-        {
-          _junction_types_map[_num_junction_types] = junction_type;
-          _junction_types[junction_type] = _num_junction_types++;
-        }
-      }
-      void set_junction_type(int id, const string& type)
-      {
-        this->add_junction_type(type);
-        _mesh.get_edge(id).data().edge_type = this->_junction_types[type];
-      }
+      
 
       void displace_vertices(const string &, const Vec&);
 
@@ -157,8 +143,6 @@ namespace VMTutorial
       type_name _cell_types_map;
       type_data _vert_types;
       type_name _vert_types_map;
-      type_data _junction_types;
-      type_name _junction_types_map;
       int _time_step;
       double _simulation_time;
       int _num_cell_types;

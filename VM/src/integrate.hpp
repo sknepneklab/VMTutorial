@@ -84,26 +84,11 @@ namespace VMTutorial
           throw runtime_error("set_external_force: Integrator type " + iname + " is not used in this simulation.");
       }
 
-      void set_radial_force(const string& iname, const string& vtype, double f)
-      {
-        if (this->factory_map.find(iname) != this->factory_map.end())
-          this->factory_map[iname]->set_radial_force(vtype, f);
-        else
-          throw runtime_error("set_radial_force: Integrator type " + iname + " is not used in this simulation.");
-      }
 
       void set_flag(const string& iname, const string& flag)
       {
         if (this->factory_map.find(iname) != this->factory_map.end())
           this->factory_map[iname]->set_flag(flag);
-        else
-          throw runtime_error("set_flag: Integrator type " + iname + " is not used in this simulation.");
-      }
-
-      void set_affine_vel(const string& iname, double v0)
-      {
-        if (this->factory_map.find(iname) != this->factory_map.end())
-          this->factory_map[iname]->set_affine_vel(v0);
         else
           throw runtime_error("set_flag: Integrator type " + iname + " is not used in this simulation.");
       }
@@ -141,28 +126,7 @@ namespace VMTutorial
           throw runtime_error("enable_constraint: Integrator type " + iname + " is not used in this simulation.");
       }
 
-      bool converged(const string& iname)
-      {
-        if (this->factory_map.find(iname) != this->factory_map.end())
-          return this->factory_map[iname]->converged();
-        else
-          throw runtime_error("converged: Integrator type " + iname + " is not used in this simulation.");
-      }
-
-      void set_rng(const string& iname, const RNGState& state)
-      {
-        if (this->factory_map.find(iname) != this->factory_map.end())
-          this->factory_map[iname]->rng_set(state);
-      }
-
-      rng_state get_rng_states()
-      {
-        rng_state state;
-        for (auto i : this->integ_order)
-          state[i] = this->factory_map[i]->get_rng_state();
-        return state;
-      }
-
+      
       void add_integrator(const string& iname)
       {
         string name = iname; 

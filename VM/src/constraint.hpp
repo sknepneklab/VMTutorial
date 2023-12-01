@@ -18,7 +18,7 @@ namespace VMTutorial
 	public:
 		Constraint() {}
 		virtual ~Constraint() {}
-		virtual Vec apply(const VertexHandle<Property> &, const Vec &) = 0;
+		virtual Vec apply(const Vertex<Property> &, const Vec &) = 0;
 		virtual Vec apply(const Vec &) = 0;
 	};
 

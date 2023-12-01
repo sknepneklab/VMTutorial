@@ -17,14 +17,11 @@ namespace VMTutorial
       .def("set_type_params", &Integrate::set_type_params)
       .def("set_string_params", &Integrate::set_string_params)
       .def("set_external_force", &Integrate::set_external_force)
-      .def("set_radial_force", &Integrate::set_radial_force)
       .def("set_flag", &Integrate::set_flag)
-      .def("set_affine_vel", &Integrate::set_affine_vel)
       .def("enable", &Integrate::enable)
       .def("disable", &Integrate::disable)
       .def("set_dt", &Integrate::set_dt)
       .def("enable_constraint", &Integrate::enable_constraint)
-      .def("converged", &Integrate::converged)
       .def("add", &Integrate::add_integrator);
   }
 }

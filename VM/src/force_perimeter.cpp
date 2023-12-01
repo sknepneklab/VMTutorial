@@ -12,8 +12,8 @@ namespace VMTutorial
   Vec ForcePerimeter::compute(const Vertex<Property>& v, const HalfEdge<Property>& he)
   {
     Vec l = he.to()->r - v.r;                    // vector along the junction pointing away from the vertex
-    Face<Property>& f   = *(he.face());         // cell to the right of the half edge
-    Face<Property>& fp = *(he.pair()->face()); // pair cell (opposite side of the same junction)
+    const Face<Property>& f   = *(he.face());         // cell to the right of the half edge
+    const Face<Property>& fp = *(he.pair()->face()); // pair cell (opposite side of the same junction)
     double P1 = _sys.mesh().perim(f);
     double P2 = _sys.mesh().perim(fp);
     double lambda_1, lambda_2;
@@ -39,8 +39,8 @@ namespace VMTutorial
 
   double ForcePerimeter::tension(const HalfEdge<Property>& he)
   {
-    Face<Property>& f   = *(he.face());         // cell to the right of the half edge
-    Face<Property>& fp = *(he.pair()->face()); // pair cell (opposite side of the same junction)
+    const Face<Property>& f   = *(he.face());         // cell to the right of the half edge
+    const Face<Property>& fp  = *(he.pair()->face()); // pair cell (opposite side of the same junction)
     
     double lambda_1, lambda_2;
     
@@ -48,8 +48,8 @@ namespace VMTutorial
     double gamma_2 = (fp.outer)   ? 0.0 : _gamma[fp.data().face_type];
     if (!_lambda_P0)
     {
-      lambda_1 = (fh->outer)   ? 0.0 : _lambda[fh->data().face_type];
-      lambda_2 = (fh_p->outer) ? 0.0 : _lambda[fh_p->data().face_type];
+      lambda_1 = (f.outer)   ? 0.0 : _lambda[f.data().face_type];
+      lambda_2 = (fp.outer) ? 0.0 : _lambda[fp.data().face_type];
     }
     else
     {
@@ -73,7 +73,6 @@ namespace VMTutorial
     double gamma = _gamma[f.data().face_type];
     if (!_lambda_P0)
         lambda = _lambda[f.data().face_type];
-    }
     
     double P0;
     if (_lambda_P0)

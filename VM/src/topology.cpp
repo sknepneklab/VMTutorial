@@ -14,9 +14,7 @@ namespace VMTutorial
   {
     for (auto e : _sys.mesh().edges())
     {
-      Vertex<Property>& vfrom = *(e.he()->from());
-      Vertex<Property>& vto = *(eh.he()->to());
-      if (!(vfrom.data().constraint == "fixed" || vto.data().constraint == "fixed"))
+      if (!(e.he()->from()->data().constraint == "fixed" || e.he()->to()->data().constraint == "fixed"))
         if (!e.erased && _sys.mesh().len(e) < _min_edge_len)
           if (_sys.mesh().T1(e, _new_edge_len))
             _sys.set_topology_change(true);

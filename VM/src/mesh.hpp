@@ -294,7 +294,7 @@ namespace VMTutorial
 			_halfedges[first_he]._prev = he->idx();
 			he->_next = _halfedges[first_he].idx();
 			fh->_he = _halfedges[first_he].idx(); // Make sure that the first half edge is the face half-edge. This makes life easier when reading in "per edge" data.
-			fh->nsides = this->face_sides(fh);
+			fh->nsides = this->face_sides(*fh);
 		}
 		else
 			_erased_faces.push_back(_n_faces - 1);
@@ -373,16 +373,10 @@ namespace VMTutorial
 		double A = 0.0;
 		for (auto he : f.circulator())
 		{
-			VertexHandle<Property> vh_from = he->from();
-			VertexHandle<Property> vh_to = he->to();
-			Vec r1 = he->from()->r - r0; // this takes care of the boundary conditions
-			Vec r2 = he->to()->r - r0;
+			Vec r1 = he.from()->r - r0; // this takes care of the boundary conditions
+			Vec r2 = he.to()->r - r0;
 			A += r1.x * r2.y - r2.x * r1.y;
 		}
-		if (A < 0.0)
-			f.outer = true;
-		else
-			f.outer = false;
 		return 0.5 * fabs(A);
 	}
 
@@ -402,10 +396,7 @@ namespace VMTutorial
 	template <typename Property>
 	double Mesh<Property>::len(const Edge<Property> &e)
 	{
-		HalfEdge<Property> &he = *(e.he());
-		Vertex<Property> &vfrom = *(he.from());
-		Vertex<Property> &vto = *(he.to());
-		return (vto.r - vfrom.r).len();
+		return (e.he()->to()->r - e.he()->from()->r).len();
 	}
 
 	template <typename Property>
@@ -502,7 +493,7 @@ namespace VMTutorial
 		for (auto he : f.circulator())
 		{
 			Vec ri = he.from()->r - r0;
-			Vec rj = he->to()->r - r0;
+			Vec rj = he.to()->r - r0;
 			double fact = ri.x * rj.y - ri.y * rj.x;
 			rc.x += (ri.x + rj.x) * fact;
 			rc.y += (ri.y + rj.y) * fact;

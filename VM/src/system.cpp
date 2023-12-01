@@ -7,7 +7,7 @@
 
 #include "system.hpp"
 
-namespace AJM
+namespace VMTutorial
 {
   
   // Read input from a JSON file
@@ -142,7 +142,6 @@ namespace AJM
   {
     py::class_<Property::EdgeProperty>(m, "EdgeProperty")
       .def_readwrite("tension", &Property::EdgeProperty::tension)
-      .def_readonly("myo", &Property::EdgeProperty::myo)
       .def_readwrite("l0", &Property::EdgeProperty::l0)
       .def_readwrite("type", &Property::EdgeProperty::edge_type);
   }
@@ -151,9 +150,7 @@ namespace AJM
   {
     py::class_<Property::HEProperty>(m, "HEProperty")
       .def_readonly("tension", &Property::HEProperty::tension)
-      .def_readwrite("myo", &Property::HEProperty::myo)
       .def_readonly("l0", &Property::HEProperty::l0)
-      .def_readonly("l0_collapse", &Property::HEProperty::l0_collapse)
       .def_readonly("force_type", &Property::HEProperty::force_type);
   }
 
@@ -163,35 +160,13 @@ namespace AJM
     py::class_<Property::FaceProperty>(m, "CellProperty")
       .def_readonly("type", &Property::FaceProperty::face_type)
       .def_readonly("type_name", &Property::FaceProperty::type_name)
-      .def_readonly("stress", &Property::FaceProperty::stress)
       .def_readonly("unique_id", &Property::FaceProperty::unique_id)
-      .def_readonly("division_time", &Property::FaceProperty::division_time)
-      .def_readonly("mother_id", &Property::FaceProperty::mother_unique_id)
       .def_readwrite("A0", &Property::FaceProperty::A0)
       .def_readwrite("P0", &Property::FaceProperty::P0)
-      .def_readwrite("p0", &Property::FaceProperty::p0)
-      .def_readwrite("native_A0", &Property::FaceProperty::native_A0)
-      .def_readwrite("native_P0", &Property::FaceProperty::native_P0)
-      .def_readwrite("max_A0", &Property::FaceProperty::max_A0)
-      .def_readwrite("fa", &Property::FaceProperty::fa)
-      .def_readwrite("phi", &Property::FaceProperty::phi)
       .def_readwrite("cell_type", &Property::FaceProperty::face_type)
-      .def_readwrite("kappa", &Property::FaceProperty::kappa)
-      .def_readwrite("gamma", &Property::FaceProperty::gamma)
-      .def_readwrite("lam", &Property::FaceProperty::lambda)
-      .def_readwrite("beta", &Property::FaceProperty::beta)
-      .def_readwrite("v0", &Property::FaceProperty::v0)
-      .def_readwrite("n", &Property::FaceProperty::n)
-      .def("add_spoke", &Property::FaceProperty::add_spoke);
+      .def_readwrite("n", &Property::FaceProperty::n);
   }
 
-  void export_Spoke(py::module& m)
-  {
-    py::class_<Spoke>(m, "Spoke")
-      .def(py::init<>())
-      .def_readwrite("myo", &Spoke::myo)
-      .def_readwrite("l0", &Spoke::l0);
-  }
 
   void export_Vertex(py::module& m)
   {
@@ -204,10 +179,7 @@ namespace AJM
       .def_readonly("coordination", &Vertex<Property>::coordination)
       .def("he", [](Vertex<Property>& v) { return *(v.he()); })
       .def("force", [](Vertex<Property>& v) { return v.data().force; })
-      .def("he_force", [](Vertex<Property>& v,int idx) { return v.data().he_force[idx]; })     
-      .def("force_type", [](Vertex<Property>& v,const std::string& type) { return v.data().f_type[type]; })
       .def("vel", [](Vertex<Property>& v) { return v.data().vel; })
-      .def("collapsed", [](Vertex<Property>& v) { return v.data().pre_T1.size(); })          
       .def("property", (Property::VertexProperty& (Vertex<Property>::*)()) &Vertex<Property>::data, py::return_value_policy::reference);
   }
 
@@ -251,9 +223,6 @@ namespace AJM
       .def("type", [](Face<Property>& f) { return f.data().face_type; })
       .def("A0", [](Face<Property>& f) { return f.data().A0; })
       .def("P0", [](Face<Property>& f) { return f.data().P0; })
-      .def("p0", [](Face<Property>& f) { return f.data().p0; })
-      .def("maxA0", [](Face<Property>& f) { return f.data().max_A0; })
-      // .def("he", (HEHandle<Property>& (Face<Property>::*)()) &Face<Property>::he, py::return_value_policy::reference)
       .def("he", [](Face<Property>& f) { return *(f.he()); })
       .def("property", (Property::FaceProperty& (Face<Property>::*)()) &Face<Property>::data, py::return_value_policy::reference);
   }
@@ -267,12 +236,8 @@ namespace AJM
       .def("tidyup", &Mesh<Property>::tidyup)
       .def("set_cell_type", [](Mesh<Property>& m, int i, int type) { m.get_face(i).data().face_type = type; })
       .def("set_junction_type", [](Mesh<Property>& m, int i, int type) { m.get_edge(i).data().edge_type = type; })
-      .def("set_cell_A0", [](Mesh<Property>& m, int i, double A0) { m.get_face(i).data().A0 = A0; m.get_face(i).data().p0 = m.get_face(i).data().P0/sqrt(A0); })
-      .def("set_cell_P0", [](Mesh<Property>& m, int i, double P0) { m.get_face(i).data().P0 = P0; m.get_face(i).data().p0 = P0/sqrt(m.get_face(i).data().A0); })
-      .def("set_cell_p0", [](Mesh<Property>& m, int i, double p0) { m.get_face(i).data().p0 = p0; m.get_face(i).data().P0 = p0*sqrt(m.get_face(i).data().A0); })
-      .def("set_cell_growth_rate", [](Mesh<Property>& m, int i, double gr) { m.get_face(i).data().growth_rate = gr; })
-      .def("set_cell_tau_A0", [](Mesh<Property>& m, int i, double tau_A0) { m.get_face(i).data().tau_A0 = tau_A0; })
-      .def("set_cell_k_growth", [](Mesh<Property>& m, int i, double k_growth) { m.get_face(i).data().k_growth = k_growth; })
+      .def("set_cell_A0", [](Mesh<Property>& m, int i, double A0) { m.get_face(i).data().A0 = A0;  })
+      .def("set_cell_P0", [](Mesh<Property>& m, int i, double P0) { m.get_face(i).data().P0 = P0;  })
       .def("get_vertex", &Mesh<Property>::get_vertex , py::return_value_policy::reference)
       .def("get_junction", &Mesh<Property>::get_halfedge, py::return_value_policy::reference)
       .def("get_cell", &Mesh<Property>::get_face, py::return_value_policy::reference)
@@ -280,17 +245,11 @@ namespace AJM
       .def("junctions", &Mesh<Property>::edges, py::return_value_policy::reference)
       .def("halfedges", &Mesh<Property>::halfedges, py::return_value_policy::reference)
       .def("cells", &Mesh<Property>::faces, py::return_value_policy::reference)
-      .def("move_vertex", &Mesh<Property>::move_vertex)
-      .def("scale", &Mesh<Property>::scale)
-      .def("shear", &Mesh<Property>::shear)
-      .def("transform", &Mesh<Property>::transform, py::arg("txx"), py::arg("txy"), py::arg("tyx"), py::arg("tyy"), py::arg("undo") = false)
-      .def("get_cell_centre", [](Mesh<Property>& m, int i) -> Vec { return m.get_face_centre(find_if(m.faces().begin(),m.faces().end(),[i](const Face<Property>& f) -> bool { return (f.id == i); })); })
-      .def("get_cell_centroid", [](Mesh<Property>& m, int i) -> Vec { return m.get_face_centroid(find_if(m.faces().begin(),m.faces().end(),[i](const Face<Property>& f) -> bool { return (f.id == i); })); })
-      .def("get_cell_shape", [](Mesh<Property>& m, int i) -> Tensor { return m.get_face_shape(find_if(m.faces().begin(),m.faces().end(),[i](const Face<Property>& f) -> bool { return (f.id == i); })); })
-      .def("get_cell_gyration", [](Mesh<Property>& m, int i) -> Tensor { return m.get_face_gyration(find_if(m.faces().begin(),m.faces().end(),[i](const Face<Property>& f) -> bool { return (f.id == i); })); })
+      .def("get_cell_centre", [](Mesh<Property>& m, int i) -> Vec { return m.get_face_centre(*(m.get_mesh_face(i))); })
+      .def("get_cell_centroid", [](Mesh<Property>& m, int i) -> Vec { return m.get_face_centroid(*(m.get_mesh_face(i))); })
       .def("get_centre", &Mesh<Property>::get_centre)
-      .def("cell_area", [](Mesh<Property> &m, int i) -> double { return m.area(find_if(m.faces().begin(), m.faces().end(), [i](const Face<Property> &f) -> bool { return (f.id == i); })); })
-      .def("cell_perim", [](Mesh<Property> &m, int i) -> double { return m.perim(find_if(m.faces().begin(), m.faces().end(), [i](const Face<Property> &f) -> bool { return (f.id == i); })); });
+      .def("cell_area", [](Mesh<Property> &m, int i) -> double { return m.area(*(m.get_mesh_face(i))); })
+      .def("cell_perim", [](Mesh<Property> &m, int i) -> double { return m.perim(*(m.get_mesh_face(i))); });
   }
 
   void export_System(py::module& m)
@@ -298,16 +257,10 @@ namespace AJM
     py::class_<System>(m, "System")
       .def(py::init<MyMesh&>())
       .def("read_input", &System::read_input, py::arg("input_file"), py::arg("read_params") = false)
-      .def("set_myomax", &System::set_parameters)
-      .def("set_cell_myosin", &System::set_cell_myosin)
       .def("add_cell_type", &System::add_cell_type)
       .def("set_cell_type", &System::set_cell_type)
-      .def("set_junction_type", &System::set_junction_type)
-      .def("set_symmetric_myosin", &System::set_symmetric_myosin)
-      .def("set_spokes", &System::set_spokes)
       .def("mesh", &System::mesh)
       .def("cell_types", &System::cell_types)
-      .def("junction_types", &System::junction_types)
       .def("time_step", &System::time_step)
       .def("simulation_time", &System::simulation_time)
       .def("set_simulation_time_step", &System::set_simulation_time_step)

@@ -22,7 +22,7 @@ namespace VMTutorial
 		Topology(System &sys, ForceCompute &fc, int seed) : _sys{sys},
 															_force_compute{fc},
 															_min_edge_len{0.02},
-															_new_edge_len{0.022},
+															_new_edge_len{0.022}
 		{
 		}
 		~Topology() = default;

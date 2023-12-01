@@ -11,7 +11,7 @@
 //#define VERSION
 
 #include <vector>
-#include <functional>
+#include <iterator>
 
 #include <pybind11/pybind11.h>
 
@@ -20,7 +20,6 @@
 
 namespace py = pybind11;
 using std::vector;
-using std::reference_wrapper;
 
 
 
@@ -33,7 +32,9 @@ namespace VMTutorial
   template<typename Property> class Face;
   template<typename Property> class Mesh;
   template<typename Property> class VertexCirculator; 
+  template<typename Property> class VertexCCirculator; 
   template<typename Property> class FaceCirculator;
+  template<typename Property> class FaceCCirculator;
 
   template<typename Property> using HEHandle     = typename vector<HalfEdge<Property>>::iterator;
   template<typename Property> using VertexHandle = typename vector<Vertex<Property>>::iterator;
@@ -170,7 +171,8 @@ namespace VMTutorial
       HEHandle<Property>  he()  { return _mesh.get_mesh_he(_he); }
       HECHandle<Property> he() const { return _mesh.get_mesh_he(_he); }
 
-      VertexCirculator<Property> circulator() { return VertexCirculator<Property>(*this); }
+      VertexCirculator<Property> circulator() { return VertexCirculator<Property>(this->he()); }
+      VertexCCirculator<Property> circulator() const { return VertexCCirculator<Property>(this->he()); }
 
       // Public members 
       Vec   r;              // position
@@ -282,10 +284,11 @@ namespace VMTutorial
       typename Property::FaceProperty& data() { return _property; }
       typename Property::FaceProperty  data() const { return _property; }
 
-      HEHandle<Property>  he()  { return _mesh.get().get_mesh_he(_he); }
-      HECHandle<Property> he() const { return _mesh.get().get_mesh_he(_he); }
+      HEHandle<Property>  he()  { return _mesh.get_mesh_he(_he); }
+      HECHandle<Property> he() const { return _mesh.get_mesh_he(_he); }
 
-      FaceCirculator<Property> circulator() { return FaceCirculator<Property>(*this); }
+      FaceCirculator<Property> circulator() { return FaceCirculator<Property>(this->he()); }
+      FaceCCirculator<Property> circulator() const { return FaceCCirculator<Property>(this->he()); }
     
       // public members 
       int id;        // face id
@@ -299,24 +302,33 @@ namespace VMTutorial
 
       typename Property::FaceProperty      _property;
       int   _he;           // one of its half edges
-      reference_wrapper<Mesh<Property>> _mesh;
+      Mesh<Property>& _mesh;
       
   };
 
+// Vertex circulator
 template<typename Property>
 class VertexCirculator 
 {
 
 public:
 
-    VertexCirculator() : _start{nullptr}, 
-                         _current{nullptr}
-    {
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = HalfEdge<Property>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = HalfEdge<Property>*;
+    using reference = HalfEdge<Property>&;
 
+    VertexCirculator() : _start{}, 
+                         _current{},
+                         _isEnd{true}
+    {
+        
     }
 
-    VertexCirculator(const Vertex<Property>& v) : _start{v.he()}, 
-                                                  _current{v.he()}
+    explicit VertexCirculator(HEHandle<Property> he) : _start{he}, 
+                                                       _current{he},
+                                                       _isEnd{false}
     {
 
     }
@@ -326,34 +338,127 @@ public:
         _current = _current->next()->pair();
         if (_current == _start) 
         {
-            _current = nullptr; // Completed full circle
+            _isEnd = true; // Completed full circle
         }
         return *this;
     }
 
-    HalfEdge<Property>& operator*() 
+    VertexCirculator operator++(int) 
+    {
+        VertexCirculator temp = *this;
+        ++(*this);
+        return *temp;
+    }
+
+    reference operator*() 
     {
         return *_current;
     }
 
+    pointer operator->() 
+    {
+        return &(*_current);
+    }
+
     bool operator==(const VertexCirculator& other) const 
     {
-        return _current == other._current;
+        return (_isEnd && other._isEnd) || (_current == other._current);
     }
 
     bool operator!=(const VertexCirculator& other) const 
     {
-        return _current != other._current;
+        return !(*this == other);
     }
 
     // Begin and end methods for range-based for loop
     VertexCirculator begin()  { return *this; }
+    VertexCirculator cbegin() const  { return *this; }
     VertexCirculator end()  { return VertexCirculator(); }
+    VertexCirculator cend() const { return VertexCirculator(); }
 
 private:
 
     HEHandle<Property> _start;
     HEHandle<Property> _current;
+    bool _isEnd;
+
+};
+
+// constant Vertex circulator
+template<typename Property>
+class VertexCCirculator 
+{
+
+public:
+
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = HalfEdge<Property>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = const HalfEdge<Property>*;
+    using reference = const HalfEdge<Property>&;
+
+    VertexCCirculator() : _start{}, 
+                         _current{},
+                         _isEnd{true}
+    {
+        
+    }
+
+    explicit VertexCCirculator(HECHandle<Property> he) : _start{he}, 
+                                                       _current{he},
+                                                       _isEnd{false}
+    {
+
+    }
+
+    VertexCCirculator& operator++() 
+    {
+        _current = _current->next()->pair();
+        if (_current == _start) 
+        {
+            _isEnd = true; // Completed full circle
+        }
+        return *this;
+    }
+
+    VertexCCirculator operator++(int) 
+    {
+        VertexCCirculator temp = *this;
+        ++(*this);
+        return *temp;
+    }
+
+    const reference operator*() const
+    {
+        return *_current;
+    }
+
+    pointer operator->() 
+    {
+        return &(*_current);
+    }
+
+    bool operator==(const VertexCCirculator& other) const 
+    {
+        return (_isEnd && other._isEnd) || (_current == other._current);
+    }
+
+    bool operator!=(const VertexCCirculator& other) const 
+    {
+        return !(*this == other);
+    }
+
+    // Begin and end methods for range-based for loop
+    VertexCCirculator begin()  { return *this; }
+    VertexCCirculator cbegin() const  { return *this; }
+    VertexCCirculator end()  { return VertexCCirculator(); }
+    VertexCCirculator cend() const { return VertexCCirculator(); }
+
+private:
+
+    HECHandle<Property> _start;
+    HECHandle<Property> _current;
+    bool _isEnd;
 
 };
 
@@ -363,15 +468,24 @@ class FaceCirculator
 {
 
 public:
-    FaceCirculator() : _start{nullptr}, 
-                       _current{nullptr} 
-    {
 
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = HalfEdge<Property>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = const HalfEdge<Property>*;
+    using reference = const HalfEdge<Property>&;
+
+    FaceCirculator() : _start{}, 
+                       _current{}
+    {
+        
     }
-    FaceCirculator(const Face<Property>& face) : _start{face.he()}, 
-                                                 _current{face.he()} 
+    explicit FaceCirculator(HEHandle<Property> he) : _start{he}, 
+                                                     _current{he},
+                                                     _isEnd{false}
+                                 
     {
-
+       
     }
 
     FaceCirculator& operator++() 
@@ -379,34 +493,126 @@ public:
         _current = _current->next();
         if (_current == _start) 
         {
-            _current = nullptr; // Completed full circle
+            _isEnd = true; // Completed full circle
         }
         return *this;
     }
 
-    HalfEdge<Property>& operator*() 
+    FaceCirculator operator++(int) 
+    {
+        FaceCirculator temp = *this;
+        ++(*this);
+        return *temp;
+    }
+
+    reference operator*() 
     {
         return *_current;
     }
 
-    bool operator==(const FaceCirculator& other) const 
+    pointer operator->() 
     {
-        return _current == other._current;
+        return &(*_current);
     }
 
-    bool operator!=(const FaceCirculator& other) const
+    bool operator==(const FaceCirculator& other) const 
     {
-        return _current != other._current;
+        return (_isEnd && other._isEnd) || (_current == other._current);
+    }
+
+    bool operator!=(const FaceCirculator& other) const 
+    {
+        return !(*this == other);
     }
 
     // Begin and end methods for range-based for loop
     FaceCirculator begin()  { return *this; }
+    FaceCirculator cbegin() const { return *this; }
     FaceCirculator end()  { return FaceCirculator(); }
+    FaceCirculator cend() const { return FaceCirculator(); }
 
 private:
 
-    HEHandle<Property>* _start;
-    HEHandle<Property>* _current;
+    HEHandle<Property> _start;
+    HEHandle<Property> _current;
+    bool _isEnd;
+
+};
+
+// Constant Face Circulator
+template<typename Property>
+class FaceCCirculator 
+{
+
+public:
+
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = HalfEdge<Property>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = const HalfEdge<Property>*;
+    using reference = const HalfEdge<Property>&;
+
+    FaceCCirculator() : _start{}, 
+                       _current{}
+    {
+        
+    }
+    explicit FaceCCirculator(HECHandle<Property> he) : _start{he}, 
+                                                     _current{he},
+                                                     _isEnd{false}
+                                 
+    {
+       
+    }
+
+    FaceCCirculator& operator++() 
+    {
+        _current = _current->next();
+        if (_current == _start) 
+        {
+            _isEnd = true; // Completed full circle
+        }
+        return *this;
+    }
+
+    FaceCCirculator operator++(int) 
+    {
+        FaceCCirculator temp = *this;
+        ++(*this);
+        return *temp;
+    }
+
+    const reference operator*() const
+    {
+        return *_current;
+    }
+
+    pointer operator->() 
+    {
+        return &(*_current);
+    }
+
+    bool operator==(const FaceCCirculator& other) const 
+    {
+        return (_isEnd && other._isEnd) || (_current == other._current);
+    }
+
+    bool operator!=(const FaceCCirculator& other) const 
+    {
+        return !(*this == other);
+    }
+
+    // Begin and end methods for range-based for loop
+    FaceCCirculator begin()  { return *this; }
+    FaceCCirculator cbegin() const { return *this; }
+    FaceCCirculator end()  { return FaceCCirculator(); }
+    FaceCCirculator cend() const { return FaceCCirculator(); }
+
+private:
+
+    HECHandle<Property> _start;
+    HECHandle<Property> _current;
+    bool _isEnd;
 
 };
 

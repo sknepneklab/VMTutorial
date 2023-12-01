@@ -11,7 +11,7 @@
 #include "constraint.hpp"
 
 namespace VMTutorial
-
+{
 	class ConstraintFixed : public Constraint
 	{
 	public:

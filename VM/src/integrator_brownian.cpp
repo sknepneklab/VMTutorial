@@ -39,9 +39,9 @@ namespace VMTutorial
           Vec fr = ffr;
           if (_constraint_enabled) 
             fr = _constrainer->apply_vector(v, ffr);
-          vh.r += sqrt_dt*fr;  // update vertex position due to noise
+          v.r += sqrt_dt*fr;  // update vertex position due to noise
         }
-        v.data().vel = (1.0 / _dt) * (vh->r - rold);  
+        v.data().vel = (1.0 / _dt) * (v.r - rold);  
       } 
     }
 

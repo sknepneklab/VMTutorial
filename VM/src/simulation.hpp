@@ -27,7 +27,7 @@ using std::string;
 using std::endl;
 using std::to_string;
 
-namespace AJM
+namespace VMTutorial
 {
 
   struct Simulation
@@ -43,7 +43,7 @@ namespace AJM
     { 
 
     }
-    void run(int, bool = true, bool = true, bool = false);
+    void run(int, bool = true, bool = true);
     const string print_version() { return  "branch : "+static_cast<string>(XSTR(GIT_BRANCH))+" commit : "+static_cast<string>(XSTR(GIT_COMMIT_HASH)); }
     void progress_bar(double, const string&);
     void store_rng_state();
