@@ -38,7 +38,7 @@ namespace VMTutorial
 
       
       // Energy of self propulsion is not defined, so we return 0
-      double energy(const FaceHandle<Property>& fh) override
+      double energy(const Face<Property>& f) override
       {
         return 0.0;   
       }

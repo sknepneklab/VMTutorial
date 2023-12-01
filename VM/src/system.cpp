@@ -83,15 +83,8 @@ namespace AJM
       else 
         _mesh.add_face(j["mesh"]["faces"][i]["vertices"]);
       Face<Property>& f = _mesh.faces().back();
-      if (j["mesh"]["faces"][i].find("unique_id") != j["mesh"]["faces"][i].end())
-        f.data().unique_id = j["mesh"]["faces"][i]["unique_id"];
-      else  
-        f.data().unique_id = f.id;
+      f.data().unique_id = f.id;
       this->increment_max_unique_id();
-      if (j["mesh"]["faces"][i].find("division_time") != j["mesh"]["faces"][i].end())
-        f.data().division_time = j["mesh"]["faces"][i]["division_time"];
-      if (j["mesh"]["faces"][i].find("mother_unique_id") != j["mesh"]["faces"][i].end())
-        f.data().mother_unique_id = j["mesh"]["faces"][i]["mother_unique_id"];
       if (!erased_face)
       {
         this->add_cell_type(j["mesh"]["faces"][i]["type"]);
@@ -102,95 +95,15 @@ namespace AJM
           f.data().A0 = j["mesh"]["faces"][i]["A0"];
         if (j["mesh"]["faces"][i].find("P0") != j["mesh"]["faces"][i].end())
           f.data().P0 = j["mesh"]["faces"][i]["P0"];
-        if (fabs(f.data().A0) > 1e-10)
-          f.data().p0 = f.data().P0/sqrt(f.data().A0); 
-        HEHandle<Property> he = f.he();
-        HEHandle<Property> first = f.he();
-        do
-        {
-          he->data().old_face_id = f.id;
-          he = he->next();
-        } while (he != first);
       }
     }
     cout << "Finished reading faces." << endl;
     _mesh.tidyup();
     cout << "Finished mesh setup." << endl;
     cout << "Mesh has " << _mesh.vertices().size() << " vertices " << _mesh.edges().size() << " edges and " << _mesh.faces().size() << " faces." << endl;
-    // We now need to loop over all edges and set the native length
-    if (j["mesh"].find("l0") != j["mesh"].end())
-    {
-      for (EdgeHandle<Property> eh = _mesh.edges().begin(); eh != _mesh.edges().end(); eh++)
-        eh->data().l0 = j["mesh"]["l0"];
-      cout << "Finished setting l0." << endl;
-    }
-    // If read_params flag is set, we loop over faces (i.e., cells) again and read in cell-specific parameters
-    if (read_params)
-      for (int i = 0; i < j["mesh"]["faces"].size(); i++)
-      {
-        if (j["mesh"]["faces"][i].find("erased") != j["mesh"]["faces"][i].end())
-          erased_face = j["mesh"]["faces"][i]["erased"];
-        else
-          erased_face = false;
-        if (!erased_face)
-        {
-          Face<Property>& f = _mesh.get_face(i);
-          if (j["mesh"]["faces"][i].find("kappa") != j["mesh"]["faces"][i].end())
-            f.data().kappa = j["mesh"]["faces"][i]["kappa"];
-          if (j["mesh"]["faces"][i].find("gamma") != j["mesh"]["faces"][i].end())
-            f.data().gamma = j["mesh"]["faces"][i]["gamma"];
-          if (j["mesh"]["faces"][i].find("lambda") != j["mesh"]["faces"][i].end())
-            f.data().lambda = j["mesh"]["faces"][i]["lambda"];
-          if (j["mesh"]["faces"][i].find("beta") != j["mesh"]["faces"][i].end())
-            f.data().beta = j["mesh"]["faces"][i]["beta"];
-          if (j["mesh"]["faces"][i].find("beta_a") != j["mesh"]["faces"][i].end())
-            f.data().beta_a = j["mesh"]["faces"][i]["beta_a"];
-          if (j["mesh"]["faces"][i].find("alpha") != j["mesh"]["faces"][i].end())
-            f.data().alpha = j["mesh"]["faces"][i]["alpha"];
-          if (j["mesh"]["faces"][i].find("cell_myo") != j["mesh"]["faces"][i].end())
-            f.data().cell_myo = j["mesh"]["faces"][i]["cell_myo"];
-          if (j["mesh"]["faces"][i].find("active_myo") != j["mesh"]["faces"][i].end())
-            f.data().active_myo = j["mesh"]["faces"][i]["active_myo"];
-          if (j["mesh"]["faces"][i].find("k") != j["mesh"]["faces"][i].end())
-            f.data().k = j["mesh"]["faces"][i]["k"];
-          if (j["mesh"]["faces"][i].find("l0") != j["mesh"]["faces"][i].end())
-          {
-            HEHandle<Property> he = f.he();
-            for (int k = 0; k < j["mesh"]["faces"][i]["l0"].size(); k++)
-            {
-              he->edge()->data().l0 = j["mesh"]["faces"][i]["l0"][k];
-              he = he->next();
-            }
-          }
-          if (j["mesh"]["faces"][i].find("myo") != j["mesh"]["faces"][i].end())
-          {
-            HEHandle<Property> he = f.he();
-            for (int k = 0; k < j["mesh"]["faces"][i]["myo"].size(); k++)
-            {
-              he->data().myo = j["mesh"]["faces"][i]["myo"][k];
-              he->edge()->data().myo += static_cast<double>(j["mesh"]["faces"][i]["myo"][k]);
-              f.data().myo.push_back(j["mesh"]["faces"][i]["myo"][k]);
-              he = he->next();
-            }
-          }
-          if (j["mesh"]["faces"][i].find("maxA0") != j["mesh"]["faces"][i].end())
-            f.data().max_A0 = j["mesh"]["faces"][i]["maxA0"];
-          if (j["mesh"]["faces"][i].find("nativeA0") != j["mesh"]["faces"][i].end())
-            f.data().native_A0 = j["mesh"]["faces"][i]["nativeA0"];
-          else
-            f.data().native_A0 = f.data().A0;
-          if (j["mesh"]["faces"][i].find("division_time") != j["mesh"]["division_time"][i].end())
-            f.data().division_time = j["mesh"]["faces"][i]["division_time"];
-        }
-      }
+    
     _mesh_set = true;
-    _has_rng_state = false;
-    if (j.find("RNG") != j.end())
-    {
-      for (int i = 0; i < j["RNG"].size(); i++)
-        this->save_rng_state(j["RNG"][i]["name"], RNGState{j["RNG"][i]["seed"], j["RNG"][i]["u_dist"], j["RNG"][i]["n_dist"]});
-      _has_rng_state = true;
-    }
+    
     cout << "Finished reading input configuration." << endl;
   }
 

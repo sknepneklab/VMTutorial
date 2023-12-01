@@ -18,22 +18,20 @@ namespace VMTutorial
 	{
 	public:
 		ForcePerimeter(System &sys) : Force{sys},
-									  _lambda_P0{false},
-
+									  _lambda_P0{false}
 		{
 			_gamma.resize(_sys.cell_types().size(), 0.0);
 			_lambda.resize(_sys.cell_types().size(), 0.0);
-			_edge_lambda.resize(_sys.junction_types().size(), 0.0);
 		}
 		virtual ~ForcePerimeter() {}
 
 		// computes force on vertex by a given edge
 		Vec compute(const Vertex<Property> &, const HalfEdge<Property> &) override;
 
-		double tension(const HalfEdge<Property> &, double, double) override;
+		double tension(const HalfEdge<Property> &) override;
 
 		// Energy calculation
-		double energy(const FaceHandle<Property> &) override;
+		double energy(const Face<Property> &) override;
 
 		// set all parameters for a given type
 		void set_params(const string &cell_type, const params_type &params) override
@@ -77,19 +75,10 @@ namespace VMTutorial
 				throw runtime_error("Unknown flag : " + flag + ".");
 		}
 
-		void copy_type_param_to_cell() override
-		{
-			for (FaceHandle<Property> fh = _sys.mesh().faces().begin(); fh != _sys.mesh().faces().end(); fh++)
-			{
-				fh->data().gamma = _gamma[fh->data().face_type];
-				fh->data().lambda = _lambda[fh->data().face_type];
-			}
-		}
-
+		
 	private:
 		vector<double> _gamma;
 		vector<double> _lambda;
-		vector<double> _edge_lambda;
 		bool _lambda_P0; // If true, lambda will be computed as gamma*P0 where P0 is read from the input configuration
 	};
 

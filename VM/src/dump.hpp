@@ -72,7 +72,6 @@ namespace VMTutorial
 
 		void dump_cells(const string &, bool = false, bool = false);
 		void dump_junctions(const string &, bool = false);
-		void dump_box(const string &, bool = false);
 		void dump_mesh(const string &, bool = false);
 		void dump_json(const string &);
 

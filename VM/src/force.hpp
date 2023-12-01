@@ -50,7 +50,7 @@ using std::cerr;
 using std::exception;
 using namespace std::chrono;
 
-namespace AJM
+namespace VMTutorial
 {
 
   // Force on a vertex

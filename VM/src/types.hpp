@@ -308,16 +308,23 @@ class VertexCirculator
 {
 
 public:
-    VertexCirculator(const Vertex<Property>& v) : _start{*v.he()}, 
-                                                  _current{&_start}
+
+    VertexCirculator() : _start{nullptr}, 
+                         _current{nullptr}
+    {
+
+    }
+
+    VertexCirculator(const Vertex<Property>& v) : _start{v.he()}, 
+                                                  _current{v.he()}
     {
 
     }
 
     VertexCirculator& operator++() 
     {
-        _current = &c_urrent->next()->pair();
-        if (_current == &_start) 
+        _current = _current->next()->pair();
+        if (_current == _start) 
         {
             _current = nullptr; // Completed full circle
         }
@@ -329,19 +336,24 @@ public:
         return *_current;
     }
 
+    bool operator==(const VertexCirculator& other) const 
+    {
+        return _current == other._current;
+    }
+
     bool operator!=(const VertexCirculator& other) const 
     {
         return _current != other._current;
     }
 
     // Begin and end methods for range-based for loop
-    VertexCirculator begin() const { return *this; }
-    VertexCirculator end() const { return VertexCirculator(); }
+    VertexCirculator begin()  { return *this; }
+    VertexCirculator end()  { return VertexCirculator(); }
 
 private:
 
-    const HalfEdge<Property>& _start;
-    const HalfEdge<Property>* _current;
+    HEHandle<Property> _start;
+    HEHandle<Property> _current;
 
 };
 
@@ -351,16 +363,21 @@ class FaceCirculator
 {
 
 public:
-    FaceCirculator(const Face<Property>& face) : _start{*face.he()}, 
-                                                 _current{&start} 
+    FaceCirculator() : _start{nullptr}, 
+                       _current{nullptr} 
+    {
+
+    }
+    FaceCirculator(const Face<Property>& face) : _start{face.he()}, 
+                                                 _current{face.he()} 
     {
 
     }
 
     FaceCirculator& operator++() 
     {
-        _current = &_current->next();
-        if (_current == &_start) 
+        _current = _current->next();
+        if (_current == _start) 
         {
             _current = nullptr; // Completed full circle
         }
@@ -369,22 +386,27 @@ public:
 
     HalfEdge<Property>& operator*() 
     {
-        return *current;
+        return *_current;
     }
 
-    bool operator!=(const FaceCirculator& other)  
+    bool operator==(const FaceCirculator& other) const 
+    {
+        return _current == other._current;
+    }
+
+    bool operator!=(const FaceCirculator& other) const
     {
         return _current != other._current;
     }
 
     // Begin and end methods for range-based for loop
-    FaceCirculator begin() const { return *this; }
-    FaceCirculator end() const { return FaceCirculator(); }
+    FaceCirculator begin()  { return *this; }
+    FaceCirculator end()  { return FaceCirculator(); }
 
 private:
 
-    const HalfEdge<Property>& _start;
-    const HalfEdge<Property>* _current;
+    HEHandle<Property>* _start;
+    HEHandle<Property>* _current;
 
 };
 

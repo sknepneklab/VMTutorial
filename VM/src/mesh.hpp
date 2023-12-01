@@ -53,7 +53,7 @@ using std::vector;
 
 namespace py = pybind11;
 
-namespace AJM
+namespace VMTutorial
 {
 
 	template <typename Property>
@@ -109,7 +109,7 @@ namespace AJM
 		// mesh manipulation functions
 		void move_vertex(int i, const Vec &);
 
-		bool T1(EdgeHandle<Property> &, double);
+		bool T1(Edge<Property> &, double);
 
 		double area(const Face<Property> &) const;
 		double perim(const Face<Property> &) const;
@@ -450,7 +450,7 @@ namespace AJM
 
 		for (auto e : _edges)
 		{
-			HalfEdge<Property> &he = *(eh->he());
+			HalfEdge<Property> &he = *(e.he());
 			Vertex<Property> &vfrom = *(he.from());
 			Vertex<Property> &vto = *(he.to());
 			e.boundary = false;
@@ -469,7 +469,7 @@ namespace AJM
 	{
 		Vec cm(0.0, 0.0);
 		for (auto v : _vertices)
-			cm += vh.r;
+			cm += v.r;
 		return static_cast<double>(1.0 / _vertices.size()) * cm;
 	}
 
@@ -483,7 +483,7 @@ namespace AJM
 		Vec rc(0.0, 0.0);
 		for (auto he : f.circulator())
 		{
-			Vec dr = he.from()->r - r0->r;
+			Vec dr = he.from()->r - r0;
 			rc += Vec(dr.x, dr.y);
 		}
 		Vec Rc = (1.0 / f.nsides) * rc + r0;

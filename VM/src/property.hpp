@@ -57,6 +57,7 @@ namespace VMTutorial
 		{
 			double A0;
 			double P0;
+			int unique_id;
 			int original_face;	// one of the faces collapsed edge belonged to
 			double kappa;		// area modulus
 			double gamma;		// perimeter modulus

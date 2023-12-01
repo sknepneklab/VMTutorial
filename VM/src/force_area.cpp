@@ -29,7 +29,7 @@
 
 #include "force_area.hpp"
 
-namespace AJM
+namespace VMTutorial
 {
 	Vec ForceArea::compute(const Vertex<Property> &v, const HalfEdge<Property> &he)
 	{

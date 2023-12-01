@@ -34,8 +34,7 @@ namespace VMTutorial
   {
     public:
 
-      ForceCompute(System& sys) : _sys{sys},
-                                  _update_flag{false}
+      ForceCompute(System& sys) : _sys{sys}
       { 
 
       }
@@ -74,11 +73,11 @@ namespace VMTutorial
         return T;
       }
 
-      double energy(const Face<Property>& f)
+      double energy(const Face<Property>& face)
       {
         double E = 0.0;
         for (auto& f : this->factory_map)
-          E += f.second->energy(f);
+          E += f.second->energy(face);
         return E;
       }
 

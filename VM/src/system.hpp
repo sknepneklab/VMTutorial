@@ -29,7 +29,6 @@
 
 #include "rng.hpp"
 #include "mesh.hpp"
-#include "myostore.hpp"
 #include "property.hpp"
 
 
@@ -54,21 +53,19 @@ using std::sqrt;
 namespace pt = boost::property_tree;
 using json = nlohmann::json;
 
-namespace AJM
+namespace VMTutorial
 {
 
   typedef Mesh<Property> MyMesh;
   typedef map<string,int> type_data;
   typedef map<int, string> type_name;
   
-  enum SPLIT_TYPE { FORWARD, BACKWARD };
 
   typedef map<string, double> params_type;         // Used when we set a numerical value to a parameter, e.g., kappa = 1.0
   typedef map<string, Vec> vec_params_type;        // Used when we set a vectorial value to a parameter, e.g., n = Vec(1,0)
   typedef map<string, vector<double>> multi_params_type;   // Used when we need to at least two values to set a parameter, e.g., a parameters is drawn from a random distribution 
   typedef map<string, string> string_params_type;         // Used when we set a string value to a parameter, e.g., force_type = "nematic_vm"
-  typedef map<string, RNGState> rng_state;    // Used to store state of various random number generators
-
+  
   bool operator<(const VertexHandle<Property>&, const VertexHandle<Property>&);
 
   class System
@@ -78,15 +75,12 @@ namespace AJM
       System(MyMesh& mesh) : _mesh{mesh}, 
                              _time_step{0},
                              _simulation_time{0.0},
-                             _symmetric_myosin{false},
-                             _has_spokes{false},
                              _num_cell_types{0},
                              _num_vert_types{0},
                              _num_junction_types{0},
                              _mesh_set{false},
                              _topology_changed{true},
-                             _max_unique_id{0},
-                             _has_rng_state{false}
+                             _max_unique_id{0}
                              { 
                                
                              }
@@ -104,8 +98,6 @@ namespace AJM
       int& time_step() { return _time_step; }
       double& simulation_time() { return _simulation_time; }
       
-      void add_myostore(VertexHandle<Property>& vh, const MyoStore<Property>& ms) { _myostore[vh] = ms; }
-      MyoStore<Property>& get_myostore(VertexHandle<Property>& vh) { return _myostore[vh]; }
 
       type_data& cell_types() { return _cell_types; }
       type_data& vert_types() { return _vert_types; }
@@ -158,23 +150,7 @@ namespace AJM
       void set_topology_change(bool flag) { _topology_changed = flag; }
       bool topology_change() { return _topology_changed;  }
 
-      void save_rng_state(const string& name, RNGState state)
-      {
-        _rng_state[name] = state;
-        _has_rng_state = true;
-      }
-
-      RNGState get_rng_state(const string& name)
-      {
-        if (_rng_state.find(name) != _rng_state.end())
-          return _rng_state.at(name);
-        return RNGState{"none", "none", "none"};
-      }
-
-      rng_state& get_all_rng_states() { return _rng_state; }
-
-      bool has_rng_state() { return _has_rng_state; }
-
+      
     private:
       MyMesh &_mesh;
       type_data _cell_types;
@@ -183,7 +159,6 @@ namespace AJM
       type_name _vert_types_map;
       type_data _junction_types;
       type_name _junction_types_map;
-      myostore_map _myostore;
       int _time_step;
       double _simulation_time;
       int _num_cell_types;
@@ -192,8 +167,7 @@ namespace AJM
       bool _mesh_set;
       bool _topology_changed;  // If true, mesh topology has changed
       int _max_unique_id;
-      rng_state _rng_state;  // State of various random number generators
-      bool _has_rng_state;   // If true, RNG state is set
+
   };
 
   void export_T1_stats(py::module&);
