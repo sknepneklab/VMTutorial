@@ -79,33 +79,17 @@ namespace VMTutorial
                              _num_vert_types{0},
                              _num_junction_types{0},
                              _mesh_set{false},
-                             _topology_changed{true},
-                             _max_unique_id{0}
+                             _topology_changed{true}
                              { 
                                
                              }
 
-      MyMesh& mesh()  { return _mesh; }
-
+      // System setup
       void set_box(const shared_ptr<Box>& box) { _mesh.set_box(box); }
-      const shared_ptr<Box> &box() const { return _mesh.box(); }
-      bool periodic() { return (_mesh.box() != nullptr); }
-
-      void read_input(const string&, bool = false);
-
+      void read_input(const string&);
       void set_simulation_time_step(int time_step) { _time_step = time_step; }
-      void increment_max_unique_id() { _max_unique_id++; }
-      int& time_step() { return _time_step; }
-      double& simulation_time() { return _simulation_time; }
-      
-
-      type_data& cell_types() { return _cell_types; }
-      type_data& vert_types() { return _vert_types; }
       const string get_cell_type_name(const int type_id) const { return _cell_types_map.at(type_id); }
       const string get_vert_type_name(const int type_id) const { return _vert_types_map.at(type_id); }
-      int get_num_cell_types() const { return _num_cell_types; }
-      int get_num_vert_types() const { return _num_vert_types; }
-      int get_max_unique_id() const { return _max_unique_id; }
       void add_cell_type(const string& cell_type)
       {
         if (_cell_types.find(cell_type) == _cell_types.end())
@@ -120,7 +104,6 @@ namespace VMTutorial
         _mesh.get_face(id).data().face_type = this->_cell_types[type];
         _mesh.get_face(id).data().type_name = type;
       }
-
       void add_vert_type(const string& vert_type)
       {
         if (_vert_types.find(vert_type) == _vert_types.end())
@@ -129,13 +112,19 @@ namespace VMTutorial
           _vert_types[vert_type] = _num_vert_types++;
         }
       }
-      
-
-      void displace_vertices(const string &, const Vec&);
-
       void set_topology_change(bool flag) { _topology_changed = flag; }
-      bool topology_change() { return _topology_changed;  }
 
+      // System info access 
+      MyMesh& mesh()  { return _mesh; }
+      type_data& cell_types() { return _cell_types; }
+      type_data& vert_types() { return _vert_types; }
+      int get_num_cell_types() const { return _num_cell_types; }
+      int get_num_vert_types() const { return _num_vert_types; }
+      const shared_ptr<Box> &box() const { return _mesh.box(); }
+      int& time_step() { return _time_step; }
+      bool periodic() { return (_mesh.box() != nullptr); }
+      double& simulation_time() { return _simulation_time; }
+      bool topology_change() { return _topology_changed;  }
       
     private:
       MyMesh &_mesh;
@@ -150,7 +139,6 @@ namespace VMTutorial
       int _num_junction_types; 
       bool _mesh_set;
       bool _topology_changed;  // If true, mesh topology has changed
-      int _max_unique_id;
 
   };
 
@@ -161,9 +149,11 @@ namespace VMTutorial
   void export_FaceProperty(py::module&);
   void export_Spoke(py::module &);
   void export_Vertex(py::module &);
+  void export_VertexCirculator(py::module &);
   void export_Edge(py::module&);
   void export_HalfEdge(py::module&);
   void export_Face(py::module&);
+  void export_FaceCirculator(py::module &);
   void export_Mesh(py::module&);
   void export_System(py::module&);
 

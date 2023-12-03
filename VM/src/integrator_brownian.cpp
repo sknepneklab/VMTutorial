@@ -20,7 +20,7 @@ namespace VMTutorial
         _force_compute.compute(v);
     
     // This is actual integrator 
-    for (auto v : _sys.mesh().vertices())
+    for (auto& v : _sys.mesh().vertices())
     {
       if (!v.erased)
       {

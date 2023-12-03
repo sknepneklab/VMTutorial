@@ -84,9 +84,11 @@ PYBIND11_MODULE(vmtutorial, m)
   VMTutorial::export_EdgeProperty(m);
   VMTutorial::export_FaceProperty(m);
   VMTutorial::export_Vertex(m);
+  VMTutorial::export_VertexCirculator(m);
   VMTutorial::export_Edge(m);
   VMTutorial::export_HalfEdge(m);
   VMTutorial::export_Face(m);
+  VMTutorial::export_FaceCirculator(m);
   VMTutorial::export_Mesh(m);
   VMTutorial::export_System(m);
   VMTutorial::export_ForceCompute(m);

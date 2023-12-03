@@ -63,7 +63,7 @@ namespace VMTutorial
 	public:
 		Mesh() : _n_faces(0), _box(nullptr) {}
 
-		//! Member functions
+		//! Mesh setup functions
 		void add_vertex(const Vertex<Property> &v)
 		{
 			_vertices.push_back(v);
@@ -72,12 +72,9 @@ namespace VMTutorial
 		}
 		void add_edge(const Edge<Property> &e) { _edges.push_back(e); }
 		void add_halfedge(const HalfEdge<Property> &he) { _halfedges.push_back(he); }
+		void set_box(const shared_ptr<Box> &box) { _box = box; }
 		void add_face(const vector<int> &, bool = false);
 
-		vector<HalfEdge<Property>> &halfedges() { return _halfedges; }
-		vector<Vertex<Property>> &vertices() { return _vertices; }
-		vector<Edge<Property>> &edges() { return _edges; }
-		vector<Face<Property>> &faces() { return _faces; }
 
 		void wipe()
 		{
@@ -92,24 +89,30 @@ namespace VMTutorial
 			_box = nullptr;
 		}
 
-		int num_vert() { return _vertices.size(); }
-		int num_faces() { return _faces.size(); }
-
-		Vertex<Property> &get_vertex(int);
-		HalfEdge<Property> &get_halfedge(int);
-		Edge<Property> &get_edge(int);
-		Face<Property> &get_face(int);
-
 		// accessor functions
 		HEHandle<Property> get_mesh_he(int);
 		VertexHandle<Property> get_mesh_vertex(int);
 		EdgeHandle<Property> get_mesh_edge(int);
 		FaceHandle<Property> get_mesh_face(int);
 
-		// mesh manipulation functions
-		void move_vertex(int i, const Vec &);
+		Vertex<Property> &get_vertex(int);
+		HalfEdge<Property> &get_halfedge(int);
+		Edge<Property> &get_edge(int);
+		Face<Property> &get_face(int);
 
+		vector<HalfEdge<Property>> &halfedges() { return _halfedges; }
+		vector<Vertex<Property>> &vertices() { return _vertices; }
+		vector<Edge<Property>> &edges() { return _edges; }
+		vector<Face<Property>> &faces() { return _faces; }
+
+		int num_vert() { return _vertices.size(); }
+		int num_faces() { return _faces.size(); }
+
+		// mesh manipulation functions
+		
 		bool T1(Edge<Property> &, double);
+
+		// mesh info functions
 
 		double area(const Face<Property> &) const;
 		double perim(const Face<Property> &) const;
@@ -124,7 +127,6 @@ namespace VMTutorial
 		Vec get_face_centroid(const Face<Property> &);
 		Vec get_face_direction(const Face<Property> &);
 
-		void set_box(const shared_ptr<Box> &box) { _box = box; }
 		const shared_ptr<Box> &box() const { return _box; }
 
 	private:
@@ -233,16 +235,7 @@ namespace VMTutorial
 	}
 	// end of accessor functions
 
-	// mesh manipulation functions
-	template <typename Property>
-	void Mesh<Property>::move_vertex(int i, const Vec &v)
-	{
-		if ((i < 0) || (i > _vertices.size()))
-			throw runtime_error("Vertex index out of bounds.");
-		VertexHandle<Property> vh = std::next(_vertices.begin(), i);
-		vh->r += v;
-	}
-
+	// mesh setup functions
 	template <typename Property>
 	void Mesh<Property>::add_face(const vector<int> &vert_ids, bool erased)
 	{
@@ -300,6 +293,7 @@ namespace VMTutorial
 			_erased_faces.push_back(_n_faces - 1);
 	}
 
+	// Mesh manipulation functions
 	//! Implements actual T1
 	template <typename Property>
 	bool Mesh<Property>::T1(Edge<Property> &e, double edge_len)
@@ -363,6 +357,22 @@ namespace VMTutorial
 		return true;
 	}
 
+	template <typename Property>
+	void Mesh<Property>::tidyup()
+	{
+		for (auto& v : _vertices)
+			if (!v.erased)
+				v.coordination = this->coordination(v);
+
+		for (auto& e : _edges)
+		{
+			e.boundary = false;
+			if (e.he()->from()->boundary && e.he()->to()->boundary)
+				e.boundary = true;
+		}
+	}
+
+	// Mesh info functions
 	template <typename Property>
 	double Mesh<Property>::area(const Face<Property> &f) const
 	{
@@ -430,28 +440,6 @@ namespace VMTutorial
 				return true;
 		}
 		return false;
-	}
-
-	template <typename Property>
-	void Mesh<Property>::tidyup()
-	{
-		for (auto v : _vertices)
-			if (!v.erased)
-				v.coordination = this->coordination(v);
-
-		for (auto e : _edges)
-		{
-			HalfEdge<Property> &he = *(e.he());
-			Vertex<Property> &vfrom = *(he.from());
-			Vertex<Property> &vto = *(he.to());
-			e.boundary = false;
-			if (vfrom.boundary && vto.boundary)
-				e.boundary = true;
-		}
-		// sign of area determines if a face is outer
-		for (auto f : _faces)
-			if (!f.erased)
-				this->area(f);
 	}
 
 	// Compute geometric centre of the mesh by tracing positions of boundary vertices

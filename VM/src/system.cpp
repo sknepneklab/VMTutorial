@@ -11,7 +11,7 @@ namespace VMTutorial
 {
   
   // Read input from a JSON file
-  void System::read_input(const string& json_file, bool read_params)
+  void System::read_input(const string& json_file)
   {
     if (_mesh_set)
     {
@@ -84,7 +84,6 @@ namespace VMTutorial
         _mesh.add_face(j["mesh"]["faces"][i]["vertices"]);
       Face<Property>& f = _mesh.faces().back();
       f.data().unique_id = f.id;
-      this->increment_max_unique_id();
       if (!erased_face)
       {
         this->add_cell_type(j["mesh"]["faces"][i]["type"]);
@@ -107,18 +106,6 @@ namespace VMTutorial
     cout << "Finished reading input configuration." << endl;
   }
 
-  
-
-  // Displace vertices of a given type by a given amount
-  void System::displace_vertices(const string & vtype, const Vec& dr)
-  {
-    if (_vert_types.find(vtype) == _vert_types.end())
-      throw runtime_error("Unknown vertex type " + vtype + " in displace vertices.");
-    int vert_type = _vert_types[vtype];
-    for (VertexHandle<Property> vh = _mesh.vertices().begin(); vh != _mesh.vertices().end(); vh++)
-      if (vh->data().vert_type == vert_type)
-        _mesh.move_vertex(vh->id, dr);
-  }
 
   // Used to be able to make a map of MyoStore
   bool operator<(const VertexHandle<Property>& lv, const VertexHandle<Property>& rv) 
@@ -183,6 +170,15 @@ namespace VMTutorial
       .def("property", (Property::VertexProperty& (Vertex<Property>::*)()) &Vertex<Property>::data, py::return_value_policy::reference);
   }
 
+  void export_VertexCirculator(py::module& m)
+  {
+    py::class_<VertexCirculator<Property>>(m, "VertexCirculator")
+        .def(py::init<Vertex<Property>>())
+        .def("__iter__", &VertexCirculator<Property>::__iter__)
+        .def("__next__", &VertexCirculator<Property>::__next__)
+        ;
+  }
+
   void export_Edge(py::module& m)
   {
     py::class_<Edge<Property>>(m, "Edge")
@@ -227,6 +223,15 @@ namespace VMTutorial
       .def("property", (Property::FaceProperty& (Face<Property>::*)()) &Face<Property>::data, py::return_value_policy::reference);
   }
 
+  void export_FaceCirculator(py::module& m)
+  {
+    py::class_<FaceCirculator<Property>>(m, "FaceCirculator")
+        .def(py::init<Face<Property>>())
+        .def("__iter__", &FaceCirculator<Property>::__iter__)
+        .def("__next__", &FaceCirculator<Property>::__next__)
+        ;
+  }
+
   void export_Mesh(py::module& m)
   {
     py::class_<Mesh<Property>>(m, "Tissue")
@@ -256,7 +261,7 @@ namespace VMTutorial
   {
     py::class_<System>(m, "System")
       .def(py::init<MyMesh&>())
-      .def("read_input", &System::read_input, py::arg("input_file"), py::arg("read_params") = false)
+      .def("read_input", &System::read_input, py::arg("input_file"))
       .def("add_cell_type", &System::add_cell_type)
       .def("set_cell_type", &System::set_cell_type)
       .def("mesh", &System::mesh)
@@ -265,8 +270,7 @@ namespace VMTutorial
       .def("simulation_time", &System::simulation_time)
       .def("set_simulation_time_step", &System::set_simulation_time_step)
       .def("get_cell_type_name", &System::get_cell_type_name)
-      .def("get_vert_type_name", &System::get_vert_type_name)
-      .def("displace_vertices", &System::displace_vertices);
+      .def("get_vert_type_name", &System::get_vert_type_name);
   }
 
   
