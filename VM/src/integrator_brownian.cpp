@@ -15,7 +15,7 @@ namespace VMTutorial
     double B = sqrt(2.0*mu*_T);
     double sqrt_dt = sqrt(_dt);
     // Compute force on each vertex
-    for (auto v : _sys.mesh().vertices())
+    for (auto& v : _sys.mesh().vertices())
       if (!v.erased)
         _force_compute.compute(v);
     

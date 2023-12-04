@@ -75,7 +75,7 @@ namespace VMTutorial
 
 }
 
-PYBIND11_MODULE(vmtutorial, m)
+PYBIND11_MODULE(vm, m)
 {
   VMTutorial::export_Vec(m);
   VMTutorial::export_Box(m);

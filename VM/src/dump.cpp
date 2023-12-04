@@ -407,32 +407,17 @@ namespace VMTutorial
 			
 			pt::ptree face;
 			pt::ptree id;
-			pt::ptree original_id;
 			pt::ptree outer;
 			pt::ptree nsides;
 			pt::ptree type;
 			pt::ptree erased;
 			pt::ptree A0;
 			pt::ptree P0;
-			pt::ptree press;
 			pt::ptree fverts;
-			pt::ptree fneighs;
 			pt::ptree rc;
 			pt::ptree rc_x, rc_y;
-			pt::ptree kappa, gamma, lambda;
-			pt::ptree beta, beta_a, alpha;
-			pt::ptree cell_myo;
-			pt::ptree active_myo;
-			pt::ptree k;
-			pt::ptree fl0;
-			pt::ptree fmyo;
-			pt::ptree ftension;
-			pt::ptree unique_id;
-			pt::ptree division_time;
-			pt::ptree mother_unique_id;
 
 			id.put("", face_id++);
-			original_id.put("", f.id);
 			outer.put("", f.outer);
 			nsides.put("", f.nsides);
 			type.put("", f.data().type_name);
@@ -453,13 +438,6 @@ namespace VMTutorial
 			face.add_child("A0", A0);
 			face.add_child("P0", P0);
 			face.add_child("vertices", fverts);
-			for (double t : tension)
-			{
-				pt::ptree pt;
-				pt.put("", t);
-				ftension.push_back(std::make_pair("", pt));
-			}
-			face.add_child("tension", ftension);
 			faces.push_back(std::make_pair("", face));
 			//}
 		}
