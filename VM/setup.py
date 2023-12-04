@@ -8,6 +8,6 @@ setup(
     license="MIT",
     packages=["vmtutorial"],
     package_dir={"": "src"},
-    cmake_install_dir="src/vm",
+    cmake_install_dir="vm",
     python_requires=">=3.8",
 )

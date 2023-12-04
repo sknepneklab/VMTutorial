@@ -19,12 +19,30 @@ else(VTK_FOUND)
     GIT_SHALLOW TRUE
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LOCATION} 
                -DCMAKE_BUILD_TYPE=Release
+               -DVTK_BUILD_ALL_MODULES=OFF
                -DBUILD_SHARED_LIBS=ON 
                -DBUILD_TESTING=OFF 
-               -DVTK_WRAP_PYTHON=OFF 
-               -DVTK_MODULE_ENABLE_VTK::IOXML=YES 
-               -DVTK_MODULE_ENABLE_VTK::IOXMLParser=YES 
-               -DVTK_RENDERING_BACKEND=None
+               -DVTK_PYTHON_VERSION=3
+               -DVTK_SMP_IMPLEMENTATION_TYPE=“OpenMP”
+               -DVTK_WRAP_PYTHON:BOOL=OFF
+               -DVTK_GROUP_ENABLE_Imaging=NO
+               -DVTK_GROUP_ENABLE_MPI=NO
+               -DVTK_GROUP_ENABLE_Qt=NO
+               -DVTK_GROUP_ENABLE_StandAlone=NO
+               -DVTK_GROUP_ENABLE_Views=NO
+               -DVTK_GROUP_ENABLE_Web=NO
+               -DVTK_MODULE_ENABLE_VTK_CommonCore=YES
+               -DVTK_MODULE_ENABLE_VTK_CommonExecutionModel=YES
+               -DVTK_MODULE_ENABLE_VTK_CommonMath=YES
+               -DVTK_MODULE_ENABLE_VTK_CommonMisc=YES
+               -DVTK_MODULE_ENABLE_VTK_CommonSystem=YES
+               -DVTK_MODULE_ENABLE_VTK_CommonTransforms=YES
+               -DVTK_MODULE_ENABLE_VTK_IOCore=YES
+               -DVTK_MODULE_ENABLE_VTK_IOLegacy=YES
+               -DVTK_MODULE_ENABLE_VTK_IOParallelXML=YES
+               -DVTK_MODULE_ENABLE_VTK_IOXML=YES
+               -DVTK_MODULE_ENABLE_VTK_IOXMLParser=YES
+               -DVTK_MODULE_ENABLE_VTK_ParallelCore=YES
    )
   set(VTKLocal TRUE)
   set(VTK_LIBS vtkCommonCore-${VTK_version} 
