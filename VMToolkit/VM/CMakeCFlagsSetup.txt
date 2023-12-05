@@ -1,0 +1,18 @@
+
+#################################
+## Setup default CXXFLAGS
+if(NOT PASSED_FIRST_CONFIGURE)
+	message(STATUS "Overriding CMake's default CFLAGS (this should appear only once)")
+    
+       execute_process(COMMAND git rev-parse HEAD OUTPUT_VARIABLE GIT_REV ERROR_QUIET)
+       string(STRIP ${GIT_REV} GIT_REV)
+	 
+       set (CMAKE_CXX_STANDARD 14)
+       set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall" CACHE STRING "Flags used by the compiler during debug builds." FORCE)
+       set(CMAKE_CXX_FLAGS_MINSIZEREL "-Os -Wall -DNDEBUG" CACHE STRING "Flags used by the compiler during minimum size release builds." FORCE)
+       set(CMAKE_CXX_FLAGS_RELEASE "-O3 -funroll-loops -ffast-math -DNDEBUG -DVERSION=\"${GIT_REV}\" " CACHE STRING "Flags used by the compiler during release builds." FORCE)
+       set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -O -funroll-loops -ffast-math -DNDEBUG -Wall" CACHE STRING "Flags used by the compiler during release builds with debug info." FORCE)
+       
+
+SET(PASSED_FIRST_CONFIGURE ON CACHE INTERNAL "First configure has run: CXX_FLAGS have had their defaults changed" FORCE)
+endif(NOT PASSED_FIRST_CONFIGURE)

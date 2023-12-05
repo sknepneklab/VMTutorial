@@ -1,0 +1,91 @@
+find_package(VTK)
+if(VTK_FOUND)
+  if (VTK_MAJOR_VERSION LESS 9)
+    include(${VTK_USE_FILE})
+  endif()
+  add_definitions(-DHAS_VTK)
+  set(VTK_LIBS ${VTK_LIBRARIES})
+  set(VTK_Group_StandAlone OFF)
+  set(VTK_Group_Rendering OFF)
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+else(VTK_FOUND)
+  message("VTK not found on the system. It will be downloaded in compiled locally. It may take a while.")
+  include(ExternalProject)
+  if (SKBUILD)
+    execute_process(COMMAND python -m site --user-site OUTPUT_VARIABLE PYTHON_SITE OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(EXTERNAL_INSTALL_LOCATION ${PYTHON_SITE}/VMToolkit/VM/extern/VTK)
+  else()
+    set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/extern/VTK)
+  endif()
+  #set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/extern/VTK)
+  set(VTK_version 9.2)
+  ExternalProject_Add(VTKLocal
+    GIT_REPOSITORY https://github.com/Kitware/VTK.git
+    GIT_TAG v${VTK_version}.6
+    GIT_SHALLOW TRUE
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LOCATION} 
+               -DCMAKE_BUILD_TYPE=Release
+               -DVTK_BUILD_ALL_MODULES=OFF
+               -DBUILD_SHARED_LIBS=ON 
+               -DBUILD_TESTING=OFF 
+               -DVTK_PYTHON_VERSION=3
+               -DVTK_SMP_IMPLEMENTATION_TYPE=“OpenMP”
+               -DVTK_WRAP_PYTHON:BOOL=OFF
+               -DVTK_GROUP_ENABLE_Imaging=NO
+               -DVTK_GROUP_ENABLE_MPI=NO
+               -DVTK_GROUP_ENABLE_Qt=NO
+               -DVTK_GROUP_ENABLE_StandAlone=NO
+               -DVTK_GROUP_ENABLE_Views=NO
+               -DVTK_GROUP_ENABLE_Web=NO
+               -DVTK_MODULE_ENABLE_VTK_CommonCore=YES
+               -DVTK_MODULE_ENABLE_VTK_CommonExecutionModel=YES
+               -DVTK_MODULE_ENABLE_VTK_CommonMath=YES
+               -DVTK_MODULE_ENABLE_VTK_CommonMisc=YES
+               -DVTK_MODULE_ENABLE_VTK_CommonSystem=YES
+               -DVTK_MODULE_ENABLE_VTK_CommonTransforms=YES
+               -DVTK_MODULE_ENABLE_VTK_IOCore=YES
+               -DVTK_MODULE_ENABLE_VTK_IOLegacy=YES
+               -DVTK_MODULE_ENABLE_VTK_IOParallelXML=YES
+               -DVTK_MODULE_ENABLE_VTK_IOXML=YES
+               -DVTK_MODULE_ENABLE_VTK_IOXMLParser=YES
+               -DVTK_MODULE_ENABLE_VTK_ParallelCore=YES
+   )
+  set(VTKLocal TRUE)
+  set(VTK_LIBS vtkCommonCore-${VTK_version} 
+               vtkCommonDataModel-${VTK_version}
+               vtkCommonExecutionModel-${VTK_version} 
+               vtkCommonMath-${VTK_version} 
+               vtkCommonSystem-${VTK_version}
+               vtkCommonTransforms-${VTK_version}
+               vtkIOCore-${VTK_version}
+               vtkIOXML-${VTK_version}
+               vtkIOXMLParser-${VTK_version}
+               vtkdoubleconversion-${VTK_version}
+               vtkexpat-${VTK_version}
+               vtklz4-${VTK_version}
+               vtklzma-${VTK_version}
+               vtksys-${VTK_version}
+               vtkzlib-${VTK_version}
+               )
+  include_directories(${EXTERNAL_INSTALL_LOCATION}/include/vtk-${VTK_version})
+  link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)
+  # use, i.e. don't skip the full RPATH for the build tree
+  set(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+  # when building, don't use the install RPATH already
+  # (but later on when installing)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+  set(CMAKE_INSTALL_RPATH "${EXTERNAL_INSTALL_LOCATION}/lib")
+
+  # add the automatically determined parts of the RPATH
+  # which point to directories outside the build tree to the install RPATH
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+  # the RPATH to be used when installing, but only if it's not a system directory
+  list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${EXTERNAL_INSTALL_LOCATION}/lib" isSystemDir)
+  if("${isSystemDir}" STREQUAL "-1")
+          set(CMAKE_INSTALL_RPATH "${EXTERNAL_INSTALL_LOCATION}/lib")
+  endif("${isSystemDir}" STREQUAL "-1")
+  add_definitions(-DHAS_VTK)
+endif(VTK_FOUND)

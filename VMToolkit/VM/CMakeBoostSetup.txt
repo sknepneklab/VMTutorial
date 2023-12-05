@@ -1,0 +1,23 @@
+
+## Boost is a required library
+
+# setup the boost static linkage
+if(ENABLE_STATIC)
+set(Boost_USE_STATIC_LIBS "ON")
+else(ENABLE_STATIC)
+set(Boost_USE_STATIC_LIBS "OFF")
+endif(ENABLE_STATIC)
+
+set(Boost_USE_MULTITHREAD "OFF")
+
+
+# first, see if we can get any supported version of Boost
+#find_package(Boost COMPONENTS algorithm REQUIRED)
+find_package(Boost)
+
+
+# if we get boost 1.35 or greater, we need to get the system library too
+
+
+include_directories(${Boost_INCLUDE_DIR})
+

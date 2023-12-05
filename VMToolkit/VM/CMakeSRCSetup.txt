@@ -1,0 +1,16 @@
+## Setup include directories and file lists for sub directories
+include_directories(${VMTOOLKIT_SOURCE_DIR}/
+                    )
+
+
+#######################
+## Configure the version info header file
+
+
+# handle linux/mac and windows dates differently
+if (NOT WIN32)
+	exec_program("date" OUTPUT_VARIABLE COMPILE_DATE)
+else(NOT WIN32)
+	exec_program("cmd" ARGS "/c date /T" OUTPUT_VARIABLE COMPILE_DATE)
+endif (NOT WIN32)
+
