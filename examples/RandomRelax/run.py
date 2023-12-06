@@ -19,7 +19,7 @@ import numpy as np
 
 # ###############################################################
 #
-# Load VMYutorial modules
+# Load VMTutorial modules
 #
 # ###############################################################
 from VMToolkit.VM import *

@@ -47,7 +47,8 @@ def make_plotter(tissue, cmap = 'hot', colourby = 'area'):
     quantity = np.array(quantity)
 
     norm = matplotlib.colors.Normalize(vmin=np.min(quantity), vmax=np.max(quantity))
-    cm = matplotlib.colormaps[cmap]
+    #cm = matplotlib.colormaps[cmap]
+    cm = matplotlib.cm.get_cmap(cmap)
 
     for q in quantity:
         colour = cm(norm(q))
@@ -67,17 +68,17 @@ def make_plotter(tissue, cmap = 'hot', colourby = 'area'):
         show_edges=True,
         line_width = 1,
         scalar_bar_args={'title': colourby},
-        show_scalar_bar=False,
+        show_scalar_bar=True,
     )
-    _ = plotter.add_scalar_bar(
-        colourby,
-        interactive=False,
-        vertical=False,
-        title_font_size=16,
-        label_font_size=16,
-        outline=False,
-        fmt='%6.2f',
-    )
+    # _ = plotter.add_scalar_bar(
+    #     colourby,
+    #     interactive=False,
+    #     vertical=False,
+    #     title_font_size=16,
+    #     label_font_size=16,
+    #     outline=False,
+    #     fmt='%6.2f',
+    # )
     plotter.camera_position = 'xy'
     return plotter
 
