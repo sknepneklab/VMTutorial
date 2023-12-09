@@ -53,7 +53,7 @@ This should significantly speed up the build process.
 
 - examples - contains several examples on how to run a simulation
 - VMToolkit - the source code for the vertex model simulation and data analysis
-- config_builders - several tools for building initial configurations
+- config_builder - several tools for building initial configurations
 
 ## Running 
 
