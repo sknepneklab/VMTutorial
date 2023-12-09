@@ -7,13 +7,11 @@ import numpy as np
 import matplotlib
 from VMToolkit.VM import *
 
+
 def make_plotter(tissue, cmap = 'hot', colourby = 'area'):
     vertices = []
     faces = []
-
-    box = tissue.vertices()[0].r.box()
-    Lx = box[0]
-    Ly = box[-1]
+    colours = []
 
     for v in tissue.vertices():
         vert = [v.r.x, v.r.y, 0]
@@ -21,16 +19,10 @@ def make_plotter(tissue, cmap = 'hot', colourby = 'area'):
 
     quantity = []
     for (i,c) in enumerate(tissue.cells()):
-        verts = [c.neighbours]
-        rc = tissue.get_cell_centroid(i)
-        omit = False
-        for he in FaceCirculator(c):
-            vto = he.vto()
-            if abs(vto.r.x - rc.x) >= 0.5*Lx or abs(vto.r.y - rc.y) >= 0.5*Ly:
-                omit = True 
-                break
-            verts.append(he.vto().id)
-        if not omit:
+        if not c.outer:
+            verts = [c.neighbours]
+            for he in FaceCirculator(c):
+                verts.append(he.vto().id)
             faces.append(verts)
             if colourby == 'area':
                 quantity.append(tissue.cell_area(i))
@@ -58,7 +50,7 @@ def make_plotter(tissue, cmap = 'hot', colourby = 'area'):
         line_width = 1,
         scalar_bar_args={'title': colourby},
         show_scalar_bar=True,
-        cmap=cm,
+        cmap=cm
     )
     plotter.camera_position = 'xy'
     return plotter
