@@ -14,7 +14,10 @@ import json
 import bz2
 import numpy as np
 import pathlib
-import vtk
+try:
+    import vtk
+except ImportError:
+    raise Exception('Python VTK support needs to be installed. Please check VTK documentation (vtk.org) on how to install it.')
 
 
 class Mesh:
