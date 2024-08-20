@@ -305,6 +305,67 @@ namespace VMTutorial
 		writer->Write();
 	}
 
+	void Dump::dump_cell_directors(const string& dir_file, bool draw_periodic, bool binary_output)
+	{
+		vtkSmartPointer<vtkPolyData> polydata =  vtkSmartPointer<vtkPolyData>::New();
+		vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+		vtkSmartPointer<vtkDoubleArray> n =  vtkSmartPointer<vtkDoubleArray>::New();
+		n->SetName("n");
+		n->SetNumberOfComponents(3);
+
+		for (auto f : _sys.mesh().faces())
+		{
+		if (!f.erased)
+		{
+			bool omit = false;
+			Vec r0 = _sys.mesh().get_face_centroid(f);
+			if (_sys.periodic())
+			{
+				Vec s0 = r0.box->inv_h * r0;
+				for (auto he : f.circulator())
+				{
+					Vec s = r0.box->inv_h * he.from()->r;
+					double sx = s.x - s0.x, sy = s.y - s0.y;
+					if (fabs(rint(sx)) > 1e-6 || fabs(rint(sy)) > 1e-6)
+						if (!draw_periodic)
+						{
+							omit = true;
+							break;
+						}
+				}
+			}
+			if (!(f.outer || omit))
+			{
+				points->InsertNextPoint(r0.x, r0.y, 0.0);
+				n->InsertNextTuple3(f.data().n.x, f.data().n.y, 0.0);
+			}
+		}
+		}
+
+		polydata->SetPoints(points);
+		polydata->GetPointData()->AddArray(n);
+		
+		// Write the file
+		vtkSmartPointer<vtkXMLPolyDataWriter> writer =  vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+		writer->SetFileName(dir_file.c_str());
+#if VTK_MAJOR_VERSION <= 5
+		writer->SetInput(polydata);
+#else
+		writer->SetInputData(polydata);
+#endif
+		if (binary_output)
+		{
+		writer->SetDataModeToBinary();
+		vtkSmartPointer<vtkZLibDataCompressor> compressor = vtkSmartPointer<vtkZLibDataCompressor>::New();   
+		compressor->SetCompressionLevel(9); // max compression level
+		writer->SetCompressor(compressor);
+		}
+		else
+		writer->SetDataModeToAscii();
+		writer->Write();
+		
+	}
+
 	
 	void Dump::dump_mesh(const string &mesh_file, bool copy_params)
 	{
@@ -558,6 +619,8 @@ namespace VMTutorial
 			{"A0", f.data().A0},
 			{"P0", f.data().P0},
 			{"vertices", verts},
+			{"n", {f.data().n.x, f.data().n.y}},
+			{"rc", {f.data().rc.x, f.data().rc.y}},
 			{"neighbours", f.data().neighs},
 			{"tension", tension}};
 	}
@@ -601,6 +664,7 @@ namespace VMTutorial
 			.def("dump_junctions", &Dump::dump_junctions, py::arg("vtk_file"), py::arg("binary_output") = false)
 			.def("dump_mesh", &Dump::dump_mesh, py::arg("mesh_file"), py::arg("copy_params") = false)
 			.def("dump_json", &Dump::dump_json)
+			.def("dump_cell_directors", &Dump::dump_cell_directors, py::arg("dir_file"), py::arg("draw_periodic") = false, py::arg("binary_output") = false)
 			.def("set_sfc", &Dump::set_sfc);
 	}
 }

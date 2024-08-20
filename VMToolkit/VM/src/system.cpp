@@ -94,6 +94,14 @@ namespace VMTutorial
           f.data().A0 = j["mesh"]["faces"][i]["A0"];
         if (j["mesh"]["faces"][i].find("P0") != j["mesh"]["faces"][i].end())
           f.data().P0 = j["mesh"]["faces"][i]["P0"];
+        if (j["mesh"]["faces"][i].find("n") != j["mesh"]["faces"][i].end())
+        {
+          double nx = j["mesh"]["faces"][i]["n"][0];
+          double ny = j["mesh"]["faces"][i]["n"][1];
+          f.data().n = Vec(nx, ny);
+        }
+        else  
+          f.data().n = Vec{0,0};
       }
     }
     cout << "Finished reading faces." << endl;

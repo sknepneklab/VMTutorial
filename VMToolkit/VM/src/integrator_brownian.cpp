@@ -42,7 +42,31 @@ namespace VMTutorial
           v.r += sqrt_dt*fr;  // update vertex position due to noise
         }
         v.data().vel = (1.0 / _dt) * (v.r - rold);  
-      } 
+      }
+    }
+
+    // Update direction of cell director using simple Brownian dynamics
+    if (_update_n)
+    {
+      double stoch_coeff = sqrt(_Dr*_dt);
+      for (auto& f : _sys.mesh().faces())
+      {
+        if (!(f.erased || f.outer))
+        {
+          double dtheta = stoch_coeff*_rng.gauss_rng();
+          Vec n = f.data().n;
+          // Sine and cosine of the rotation angle
+          double c = cos(dtheta), s = sin(dtheta);
+          // Rotation matrix around z axis
+          double Rxx = c, Rxy = -s;
+          double Ryx = s, Ryy = c;
+          // Apply rotation matrix
+          double nx = Rxx*n.x + Rxy*n.y;
+          double ny = Ryx*n.x + Ryy*n.y;
+          double len = sqrt(nx*nx + ny*ny);
+          f.data().n = Vec(nx/len, ny/len);  // Rotation does not change length of a vector, but numerical errors can accumulate, so we normalize it
+        }
+      }
     }
 
   }

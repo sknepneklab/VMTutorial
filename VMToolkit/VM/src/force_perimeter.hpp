@@ -48,7 +48,7 @@ namespace VMTutorial
 			try
 			{
 				if (_sys.cell_types().find(cell_type) == _sys.cell_types().end())
-					throw runtime_error("Fore perimeter: Cell type " + cell_type + " is not defined.");
+					throw runtime_error("Force perimeter: Cell type " + cell_type + " is not defined.");
 				if (_gamma.size() < _sys.get_num_cell_types())
 					_gamma.resize(_sys.get_num_cell_types(), 0.0);
 				if (_lambda.size() < _sys.get_num_cell_types())

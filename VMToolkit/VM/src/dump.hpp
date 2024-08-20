@@ -74,6 +74,7 @@ namespace VMTutorial
 		void dump_junctions(const string &, bool = false);
 		void dump_mesh(const string &, bool = false);
 		void dump_json(const string &);
+		void dump_cell_directors(const string&, bool = false, bool = false);
 
 		void set_sfc(double sfc) { _sfc = sfc; }
 

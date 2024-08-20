@@ -51,7 +51,7 @@ namespace VMTutorial
         try 
         {
           if (_sys.cell_types().find(cell_type) == _sys.cell_types().end())
-            throw runtime_error("Fore area: Cell type " + cell_type + " is not defined.");
+            throw runtime_error("Force area: Cell type " + cell_type + " is not defined.");
           if (_kappa.size() < _sys.get_num_cell_types())
             _kappa.resize(_sys.get_num_cell_types(), 0.0);
           int ct = _sys.cell_types()[cell_type];
